@@ -62,6 +62,43 @@
         state: "stopped"
   become: true
 
+#configure the firewall
+- name: make sure firewall is configured
+  block:
+    - name: make sure firewalld is installed
+      apt:
+        name: firewalld
+        state: present
+    - name: make sure firewalld is running and is enabled
+      systemd:
+        name: firewalld
+        state: started
+        enabled: true
+    - name: configure masters firewall
+      firewalld:
+        port: "{{ item }}" 
+        permanent: true
+        state: enabled
+      loop:
+        - '6443/tcp'
+        - '2379-2380/tcp'
+        - '10250/tcp'
+        - '10259/tcp'
+        - '10257/tcp'
+      when: "'kube_masters' in group_names"
+    - name: configure nodes firewall
+      firewalld:
+        port: "{{ item }}" 
+        permanent: true
+        state: enabled
+      loop:
+        - '10250/tcp'
+        - '30000-32767/tcp'
+      when: "'kube_nodes' in group_names"
+      notify: reload firewalld
+  become: true
+
+
 - name: reboot the machine to apply the settings set earlier
   reboot:
   become: true

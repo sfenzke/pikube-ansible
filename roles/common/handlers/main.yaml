@@ -1,3 +1,8 @@
 - name: "reload kernel parameters"
   shell: "sysctl --system"
   become: true
+
+- name: reload firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
