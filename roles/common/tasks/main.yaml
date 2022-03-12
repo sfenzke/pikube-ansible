@@ -1,0 +1,74 @@
+---
+
+- name: make sure overlay and netfilter module become loaded
+  copy:
+    src: containerd.conf
+    dest: /etc/module-load.d/
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  register: modules_loaded
+
+#enable cgroups memory because it is disabled by default on raspberry OS 
+- name: make sure cgroups memory is enabled
+  replace:
+    path: /boot/cmdline.txt
+    regexp: '^([\w](?!.*\b{{ item }}\b).*)$'
+    replace: '\1 {{ item }}'
+  with_items:
+    - "cgroup_enable=memory"
+  become: true
+  register: cgroups_memory_enabled
+
+#disable swap because this is required by kubernetes 
+- name: make sure swap is disabled
+  block:
+    - name: "check if swap is enabled"
+      shell: "test $(cat /proc/swaps | wc -l) -eq 1"
+      register: swap_check
+      ignore_errors: yes
+      changed_when: swap_check.rc != 0
+    - name: "make sure the swapfile is disabled"
+      command: "dphys-swapfile swapoff"
+      when: swap_check.rc != 0
+      register: swap_disabled
+    - name: "make sure the dphys-swapfile service is disabled"
+      systemd:
+        name: "dphys-swapfile"
+        enabled: no
+        state: "stopped"
+  become: true
+
+- name: reboot the machine to apply the settings set earlier
+  reboot:
+  become: true
+  when: modules_loaded.changed or cgroups_memory_enabled.changed or swap_disabled.changed
+
+- name: make sure google cloud public signing key is present
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    keyring: /etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg
+    state: present
+  become: true
+
+- name: make sure kubernetes repository is present
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+    filename: kubernetes
+  become: true
+
+- name: make sure all required packages are installed
+  apt:
+    name: "{{ item }}"
+    state: present
+  become: true
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - docker.io
+    - kubelet
+    - kubeadm
+    - kubectl
