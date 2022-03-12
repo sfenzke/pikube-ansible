@@ -2,6 +2,15 @@
 ############################
 #       Prerequisites      #
 ############################
+- name: make sure the required modules are loaded
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - br_netfilter
+    - overlay
+  become: true
+
 - name: make sure overlay and netfilter module become loaded after reboot
   copy:
     src: containerd.conf
