@@ -1,0 +1,3 @@
+- name: "reload kernel parameters"
+  shell: "sysctl --system"
+  become: true

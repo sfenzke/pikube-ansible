@@ -22,7 +22,15 @@
   become: true
   register: modules_loaded
 
-
+- name: make sure the bridge kernel setting is present
+  copy:
+    src: k8s.conf
+    dest: /etc/sysctl.d/
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify: reload kernel parameters
 
 #enable cgroups memory because it is disabled by default on raspberry OS 
 - name: make sure cgroups memory is enabled
