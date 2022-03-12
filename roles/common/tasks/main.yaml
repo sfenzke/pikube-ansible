@@ -2,6 +2,7 @@
 ############################
 #       Prerequisites      #
 ############################
+#mak sure the required modules are loaded
 - name: make sure the required modules are loaded
   modprobe:
     name: "{{ item }}"
@@ -20,6 +21,8 @@
     mode: 0644
   become: true
   register: modules_loaded
+
+
 
 #enable cgroups memory because it is disabled by default on raspberry OS 
 - name: make sure cgroups memory is enabled
