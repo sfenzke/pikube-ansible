@@ -43,14 +43,9 @@
 #disable swap because this is required by kubernetes 
 - name: make sure swap is disabled
   block:
-    - name: "check if swap is enabled"
-      shell: "test $(cat /proc/swaps | wc -l) -eq 1"
-      register: swap_check
-      ignore_errors: true
-      changed_when: swap_check.rc != 0
     - name: "make sure the swapfile is disabled"
       command: "dphys-swapfile swapoff"
-      when: swap_check.rc != 0
+      when: ansible_facts['memory_mb']['swap']['total'] > 0
       register: swap_disabled
     - name: "make sure the dphys-swapfile service is disabled"
       systemd:
