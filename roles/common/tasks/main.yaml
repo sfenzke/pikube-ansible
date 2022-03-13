@@ -34,14 +34,11 @@
 
 #enable cgroups memory because it is disabled by default on raspberry OS 
 - name: make sure cgroups memory is enabled
-  replace:
-    path: /boot/cmdline.txt
-    regexp: '^([\w](?!.*\b{{ item }}\b).*)$'
-    replace: '\1 {{ item }}'
-  with_items:
-    - "cgroup_enable=memory"
-  become: true
+  template:
+    src: cmdline.txt.j2
+    dest: /boot/cmdline.txt
   register: cgroups_memory_enabled
+  become: true
 
 #disable swap because this is required by kubernetes 
 - name: make sure swap is disabled
