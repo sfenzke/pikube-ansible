@@ -90,7 +90,6 @@
       notify: reload firewalld
   become: true
 
-
 - name: reboot the machine to apply the settings set earlier
   reboot:
   become: true
