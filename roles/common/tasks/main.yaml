@@ -1,4 +1,21 @@
 ---
+
+############################
+#       Create Users       #
+############################
+- name: make sure users are present
+  user:
+    name: "{{ item.name }}"
+    state: present
+  loop: "{{ host_os.users }}"
+
+- name: make sure ssh keys are present
+  authorized_key:
+    user: "{{ item.name }}"
+    state: present
+    key: "{{ item.ssh_public_key }}"
+  loop: "{{ host_os.users }}"
+
 ############################
 #       Prerequisites      #
 ############################
