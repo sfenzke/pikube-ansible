@@ -1,0 +1,5 @@
+---
+
+- name: init kubernetes cluster
+  shell: kubeadm init --pod-network-cidr {{ kubernetes.pod_cidr }}
+  creates: /etc/kubernetes/kubelet.conf
