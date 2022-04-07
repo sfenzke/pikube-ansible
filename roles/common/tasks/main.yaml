@@ -93,20 +93,8 @@
         state: enabled
       loop:
         - '6443/tcp'
-        - '2379-2380/tcp'
+        - '8472/udp'
         - '10250/tcp'
-        - '10259/tcp'
-        - '10257/tcp'
-      when: "'kube_masters' in group_names"
-    - name: configure nodes firewall
-      firewalld:
-        port: "{{ item }}" 
-        permanent: true
-        state: enabled
-      loop:
-        - '10250/tcp'
-        - '30000-32767/tcp'
-      when: "'kube_workers' in group_names"
       notify: reload firewalld
   become: true
 
