@@ -1,0 +1,7 @@
+---
+
+- name: deploy k3s server
+  shell:
+    cmd: "curl -sfL https://get.k3s.io | K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ hostvars[groups['kube_masters'][0]]['token'] }} sh -"
+    creates: "/usr/local/bin/kubectl"
+  become: true
