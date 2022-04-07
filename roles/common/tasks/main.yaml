@@ -74,94 +74,43 @@
         state: "stopped"
   become: true
 
-#configure the firewall
-- name: make sure firewall is configured
-  block:
-    - name: make sure firewalld is installed
-      apt:
-        name: firewalld
-        state: present
-    - name: make sure firewalld is running and is enabled
-      systemd:
-        name: firewalld
-        state: started
-        enabled: true
-    - name: configure masters firewall
-      firewalld:
-        port: "{{ item }}" 
-        permanent: true
-        state: enabled
-      loop:
-        - '6443/tcp'
-        - '2379-2380/tcp'
-        - '10250/tcp'
-        - '10259/tcp'
-        - '10257/tcp'
-      when: "'kube_masters' in group_names"
-    - name: configure nodes firewall
-      firewalld:
-        port: "{{ item }}" 
-        permanent: true
-        state: enabled
-      loop:
-        - '10250/tcp'
-        - '30000-32767/tcp'
-      when: "'kube_nodes' in group_names"
-      notify: reload firewalld
-  become: true
+# #configure the firewall
+# - name: make sure firewall is configured
+#   block:
+#     - name: make sure firewalld is installed
+#       apt:
+#         name: firewalld
+#         state: present
+#     - name: make sure firewalld is running and is enabled
+#       systemd:
+#         name: firewalld
+#         state: started
+#         enabled: true
+#     - name: configure masters firewall
+#       firewalld:
+#         port: "{{ item }}" 
+#         permanent: true
+#         state: enabled
+#       loop:
+#         - '6443/tcp'
+#         - '2379-2380/tcp'
+#         - '10250/tcp'
+#         - '10259/tcp'
+#         - '10257/tcp'
+#       when: "'kube_masters' in group_names"
+#     - name: configure nodes firewall
+#       firewalld:
+#         port: "{{ item }}" 
+#         permanent: true
+#         state: enabled
+#       loop:
+#         - '10250/tcp'
+#         - '30000-32767/tcp'
+#       when: "'kube_nodes' in group_names"
+#       notify: reload firewalld
+#   become: true
 
 - name: reboot the machine to apply the settings set earlier
   reboot:
   become: true
   when: modules_loaded.changed or cgroups_memory_enabled.changed or swap_disabled.changed
-
-###########################
-#   Configure Repos       #
-###########################
-
-- name: make sure docker public siging key is present
-  apt_key:
-    url: https://download.docker.com/linux/raspbian/gpg
-    keyring: /etc/apt/trusted.gpg.d/docker.gpg
-    state: present
-  become: true
-
-- name: make sure google cloud public signing key is present
-  apt_key:
-    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-    keyring: /etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg
-    state: present
-  become: true
-
-- name: make sure docker repository is present
-  apt_repository:
-    repo: "deb [arch=arm64 signed-by=/etc/apt/trusted.gpg.d/docker.gpg] https://download.docker.com/linux/raspbian bullseye stable"
-    state: present
-    filename: docker
-  become: true
-
-- name: make sure kubernetes repository is present
-  apt_repository:
-    repo: "deb [signed-by=/etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
-    state: present
-    filename: kubernetes
-  become: true
-
-############################
-#     Install packages     #
-############################
-- name: make sure all required packages are installed
-  apt:
-    name: "{{ item }}"
-    state: present
-  become: true
-  loop:
-    - apt-transport-https
-    - ca-certificates
-    - curl
-    - gnupg
-    - lsb-release
-    - docker.io
-    - kubelet
-    - kubeadm
-    - kubectl
