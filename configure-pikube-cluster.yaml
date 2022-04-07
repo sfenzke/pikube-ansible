@@ -7,3 +7,7 @@
 - hosts: kube_masters
   roles:
     - pikube-master
+
+- hosts: kube_workers
+  roles:
+    - pikube-worker

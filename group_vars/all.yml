@@ -3,5 +3,4 @@ host_os:
     - name: sfenzke
       ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDRju8MB/kGJeA+XRj9JEEklMKWdt4+u/BDWVe7/kuEXCjHcIRbE7Nf4j2QNsH1Gmqcd4SjjAvkNTcKlvI2/CFed2SHr/7zLEe8tBUZzY3mhGoj9A9WtluJw3l+Qrh0q/sDuNefd2paewDFfuyVoQCjc9DQZu47fcFMNBJj8qcQEM96CyB6NwVtCvycrrqc/9h3zeG7Q5+pOKlQ2kHhSHO0UYMu76kjNjapU8RvsZvPRFmlCCSB2eXtV3VaiddguF5+HbNjul1PtVomzVQIa0eKg0JuPmiROoL+7rXjNYoZWPqQQXCgmuIWjZ1ghNONoBqNWZ7sCKatJjI27Teg2msF94Y+1/EAQZkOGc+ZxhVj3foIM1oATBMce1t0pXHR8aJ12G+R7CILFzshu32FOqD4RHjNB701wdbuAeMeqdqG+BqBWke1LzKPDHztGHtY8oJLFrOBRO3nwsLMDK+ZoZRDdDv8s3pK2Any+Ivpqiby1z4H5a9S0uvws0DBOwaiAQs= stefa@LAPTOP-V99B4A9I"
 
-kubernetes:
-  pod_cidr: 10.0.0.0/16
+master_ip: "{{ hostvars[groups['kube_masters'][0]]['ansible_host'] | default(groups['master'][0]) }}"

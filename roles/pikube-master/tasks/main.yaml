@@ -1,0 +1,51 @@
+---
+
+- name: deploy k3s server
+  shell:
+    cmd: "curl -sfL https://get.k3s.io | sh -"
+    creates: "/usr/local/bin/kubectl"
+  become: true
+
+- name: wait for node token
+  wait_for:
+    path: "{{ k3s_server_location }}/server/node-token"
+  become: true
+
+- name: read node token from master
+  slurp:
+    path: "{{ k3s_server_location }}/server/node-token"
+  register: node_token
+  become: true
+
+- name: set token as fact
+  set_fact:
+    token: "{{ node_token.content | b64decode | regex_replace('\n','')}}"
+
+- name: make sure .kube directory is present
+  file:
+    path: "-{{ ansible_env.USER }}/.kube"
+    state: directory
+    owner: "{{ ansible_env.USER }}"
+    mode: 0750
+
+- name : make sure config file is present in home directory
+  copy: 
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: ~{{ ansible_env.USER }}/.kube/config
+    remote_src: yes
+    owner: "{{ ansible_env.USER }}"
+    mode: "0600"
+  become: true
+
+- name: replace https://localhost:6443 by https://master-ip:6443
+  command: >-
+    kubectl config set-cluster default
+      --server=https://{{ master_ip }}:6443
+      --kubeconfig ~{{ ansible_env.USER }}/.kube/config
+  changed_when: true
+
+- name: make sure KUBECONFIG variable is in .bashrc
+  lineinfile:
+    path: ~{{ ansible_env.USER }}/.bashrc
+    insertafter: EOF
+    line: "export KUBECONFIG=~{{ ansible_env.USER }}/.kube/config"
