@@ -80,22 +80,22 @@
     - name: make sure firewalld is installed
       apt:
         name: firewalld
-        state: present
-    - name: make sure firewalld is running and is enabled
-      systemd:
-        name: firewalld
-        state: started
-        enabled: true
-    - name: configure masters firewall
-      firewalld:
-        port: "{{ item }}" 
-        permanent: true
-        state: enabled
-      loop:
-        - '6443/tcp'
-        - '8472/udp'
-        - '10250/tcp'
-      notify: reload firewalld
+        state: absent
+    # - name: make sure firewalld is running and is enabled
+    #   systemd:
+    #     name: firewalld
+    #     state: started
+    #     enabled: true
+    # - name: configure masters firewall
+    #   firewalld:
+    #     port: "{{ item }}" 
+    #     permanent: true
+    #     state: enabled
+    #   loop:
+    #     - '6443/tcp'
+    #     - '8472/udp'
+    #     - '10250/tcp'
+    #   notify: reload firewalld
   become: true
 
 - name: reboot the machine to apply the settings set earlier
