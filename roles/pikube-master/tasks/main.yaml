@@ -61,3 +61,11 @@
     path: ~{{ ansible_env.USER }}/.bashrc
     insertafter: EOF
     line: "export KUBECONFIG=~{{ ansible_env.USER }}/.kube/config"
+
+- name: make sure the tls certificate update cronjob is present
+  cron:
+    name: update tls certificate
+    day: "1"
+    hour: "0"
+    minute: "30"
+    job: ~/kubernetes/traefik-tls/update_letsencrypt_cert.sh
