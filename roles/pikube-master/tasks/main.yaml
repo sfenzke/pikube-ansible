@@ -1,4 +1,16 @@
 ---
+- name: make sure .ssh directory is present and has the correct access permissions
+  file:
+    path: ~/.ssh
+    state: directory
+    mode: 0700
+
+- name: make sure the ssh private key is present
+  copy:
+    src: automation_ssh_private_key
+    dest: ~/.ssh/id_rsa
+    decrypt: yes
+    mode: 0400
 
 - name: deploy k3s server
   shell:
